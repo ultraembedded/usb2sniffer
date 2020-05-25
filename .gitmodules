@@ -4,3 +4,6 @@
 [submodule "cores/ft60x_axi"]
 	path = cores/ft60x_axi
 	url = https://github.com/ultraembedded/core_ft60x_axi.git
+[submodule "cores/usb_sniffer"]
+	path = cores/usb_sniffer
+	url = https://github.com/ultraembedded/core_usb_sniffer.git

@@ -24,6 +24,7 @@ The remainder (DDR3, CDC, PLL) are IP cores built with Xilinx Vivado.
 
 | Name                   | Description                                                 | Provider |
 | ---------------------- | ------------------------------------------------------------| -------- |
+| usb_sniffer            | [USB Sniffer Core](https://github.com/ultraembedded/core_usb_sniffer) | - |
 | ulpi_wrapper           | [ULPI PHY Interface](https://github.com/ultraembedded/core_ulpi_wrapper) | - |
 | ft60x_axi              | [FTDI USB3.0 to AXI bus master](https://github.com/ultraembedded/core_ft60x_axi) | - |
 | mig_axis.xci           | [MIG DDR3 Controller](https://github.com/ultraembedded/usb2sniffer/blob/master/cores/ddr/mig_axis.xci) | Xilinx |
