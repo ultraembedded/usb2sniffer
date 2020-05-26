@@ -17,6 +17,41 @@ git clone --recursive https://github.com/ultraembedded/usb2sniffer.git
 
 ```
 
+#### Usage
+
+With the bitstream loaded onto the target board, the following sequence can be used to capture some USB traffic;
+
+```
+# Build the command line applications
+cd sw
+make
+
+# Start a capture
+./capture/capture -f /tmp/capture.bin
+
+# Convert to PCAP
+./convert/convert -f /tmp/capture.bin -o capture.pcap
+
+# Convert to txt file
+./convert/convert -f /tmp/capture.bin -o capture.txt
+
+# Convert to USB file
+./convert/convert -f /tmp/capture.bin -o capture.usb
+```
+
+#### Wireshark
+
+To view PCAPs with Wireshark, a recent version is required (>= 2019).
+
+To get a recent dev build of Wireshark on Ubuntu/Debian/Mint;
+```
+sudo add-apt-repository ppa:wireshark-dev/stable
+sudo apt-get update
+sudo apt-get install wireshark
+```
+
+![Wireshark](docs/wireshark.jpg)
+
 ## IP Designs Used
 
 Most of the IP cores used in this project are designed by myself and available as easy to follow open-source Verilog modules.
