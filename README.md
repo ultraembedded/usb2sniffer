@@ -35,9 +35,15 @@ make
 # Convert to txt file
 ./convert/convert -f /tmp/capture.bin -o capture.txt
 
-# Convert to USB file
+# Convert to USB file (readable using LcSniff)
 ./convert/convert -f /tmp/capture.bin -o capture.usb
 ```
+
+#### LambdaConcept Lcsniff
+
+After converting captured data from binary to .usb file format, the [LambdaConcept Lcsniff GUI](https://github.com/lambdaconcept/usb2sniffer-qt) can be used to view the captured data;
+
+![Lcsniff](docs/lcsniff.png)
 
 #### Wireshark
 
