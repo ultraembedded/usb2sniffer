@@ -50,7 +50,7 @@ sudo apt-get update
 sudo apt-get install wireshark
 ```
 
-![Wireshark](docs/wireshark.jpg)
+![Wireshark](docs/wireshark.png)
 
 ## IP Designs Used
 
