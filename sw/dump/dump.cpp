@@ -34,55 +34,96 @@ class convert_txt: public capture_bin
 public:
     convert_txt(FILE *f)
     {
-        m_file = f;
+        m_file      = f;
+        m_token_pid = 0;
+        m_token_dev = 0;
+        m_token_ep  = 0;
+        m_data_pid  = 0;
+        m_data_len  = 0;
+        m_hshake    = 0;
     }
+    
+    void display(void)
+    {
+        if (m_token_pid == 0)
+            return ;
+
+        fprintf(m_file, "%s Device %d Endpoint %d\n", capture_bin::get_pid_str(m_token_pid), m_token_dev, m_token_ep);
+
+        if (m_data_pid && m_data_len)
+        {
+            fprintf(m_file, "  %s: Length %d\n", capture_bin::get_pid_str(m_data_pid), m_data_len-2);
+
+            fprintf(m_file, "  ");
+            for (int i=0;i<m_data_len-2;i++)
+            {
+                fprintf(m_file, "%02x ", m_data[i]);
+
+                if (!((i+1) & 0xF) || ((i+1) == (m_data_len-2)))
+                    fprintf(m_file, "\n  ");
+            }
+
+            fprintf(m_file, "%s\n", capture_bin::get_pid_str(m_hshake));
+        }
+
+        m_data_len  = 0;
+        m_token_pid = 0;
+    }
+
     bool on_sof(uint16_t frame_num)
     {
-        fprintf(m_file, "SOF - Frame %d\n", frame_num);
+        // Buffered data - likely to be ISO
+        if (m_data_len)
+            display();
         return true;
     }
     bool on_rst(bool in_rst)
     {
-        fprintf(m_file, "USB RST = %d\n", in_rst);
+        if (in_rst)
+            fprintf(m_file, "USB Device Reset\n");
         return true;
     }
     bool on_token(uint8_t pid, uint8_t dev, uint8_t ep)
     {
-        fprintf(m_file, "%s Device %d Endpoint %d\n", capture_bin::get_pid_str(pid), dev, ep);
+        // Buffered data - likely to be ISO
+        if (m_data_len)
+            display();
+
+        //fprintf(m_file, "%s Device %d Endpoint %d\n", capture_bin::get_pid_str(pid), dev, ep);
+        m_token_pid = pid;
+        m_token_dev = dev;
+        m_token_ep  = ep;
         return true;
     }
     bool on_split(uint8_t hub_addr, bool complete)
     {
-        fprintf(m_file, "%s Hub Addr %d\n", complete ? "CSPLIT" : "SSPLIT", hub_addr);
         return true;
     }
     bool on_handshake(uint8_t pid)
     {
-        fprintf(m_file, "  %s\n", capture_bin::get_pid_str(pid));
+        m_hshake = pid;
+        if (pid == PID_ACK || pid == PID_STALL)
+            display();
         return true;
     }
     bool on_data(uint8_t pid, uint8_t *data, int length)
     {
-        fprintf(m_file, "  %s: Length %d\n", capture_bin::get_pid_str(pid), length-2);
-
-        fprintf(m_file, "  ");
-        for (int i=0;i<length-2;i++)
-        {
-            fprintf(m_file, "%02x ", data[i]);
-
-            if (!((i+1) & 0xF) || ((i+1) == (length-2)))
-                fprintf(m_file, "\n  ");
-        }
-
-        uint16_t exp_crc = capture_bin::calc_crc16(data, length-2);
-        exp_crc = (exp_crc >> 8) | (exp_crc << 8);
-
-        fprintf(m_file, "CRC = %02x%02x (Expected = %04x)\n", data[length-2], data[length-1], exp_crc);
+        memcpy(m_data, data, length);
+        m_data_len = length;
+        m_data_pid = pid;
         return true;
     }
 
 protected:
     FILE *m_file;
+
+    uint8_t m_token_pid;
+    uint8_t m_token_dev;
+    uint8_t m_token_ep;
+    uint8_t m_data[MAX_PACKET_SIZE];
+    uint8_t m_data_pid;
+    int     m_data_len;
+    uint8_t m_hshake;
 };
 
 //-----------------------------------------------------------------
