@@ -27,4 +27,5 @@ Usage:
   --no-sof     | -s            Disable SOF collection (breaks timing info)
   --no-in-nak  | -i            Disable IN+NAK capture
   --filename   | -f FILENAME   File to capture to (default: capture.bin)
+  --usb-speed  | -u hs|fs|ls   USB speed for timing info (default: hs)
 ```

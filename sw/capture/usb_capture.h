@@ -97,6 +97,16 @@ public:
         return m_hw->write32(CFG_BASE_ADDR + USB_BUFFER_CFG, m_cfg_reg);
     }
     //-----------------------------------------------------------------
+    // set_speed: Configure PHY USB speed
+    //-----------------------------------------------------------------
+    bool set_speed(uint32_t speed)
+    {
+        m_cfg_reg &= ~(USB_BUFFER_CFG_SPEED_MASK << USB_BUFFER_CFG_SPEED_SHIFT);
+        m_cfg_reg |=  (speed                     << USB_BUFFER_CFG_SPEED_SHIFT);
+
+        return m_hw->write32(CFG_BASE_ADDR + USB_BUFFER_CFG, m_cfg_reg);
+    }
+    //-----------------------------------------------------------------
     // set_phy: Manual control of the ULPI PHY pullups, mode
     //-----------------------------------------------------------------
     bool set_phy(int xcvrselect, int termsel, int opmode, int dp_pull, int dm_pull)

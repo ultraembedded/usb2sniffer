@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------
 // Command line options
 //-----------------------------------------------------------------
-#define GETOPTS_ARGS "f:o:h"
+#define GETOPTS_ARGS "f:o:u:h"
 
 static struct option long_options[] =
 {

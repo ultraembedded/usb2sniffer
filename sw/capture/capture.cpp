@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------
 // Command line options
 //-----------------------------------------------------------------
-#define GETOPTS_ARGS "d:e:nisf:h"
+#define GETOPTS_ARGS "d:e:nisf:u:h"
 
 static struct option long_options[] =
 {
@@ -23,6 +23,7 @@ static struct option long_options[] =
     {"no-sof",       no_argument,       0, 's'},
     {"no-in-nak",    no_argument,       0, 'i'},
     {"filename",     required_argument, 0, 'f'},
+    {"usb-speed",    required_argument, 0, 'u'},
     {"help",         no_argument,       0, 'h'},
     {0, 0, 0, 0}
 };
@@ -36,6 +37,7 @@ static void help_options(void)
     fprintf (stderr,"  --no-sof     | -s            Disable SOF collection (breaks timing info)\n");
     fprintf (stderr,"  --no-in-nak  | -i            Disable IN+NAK capture\n");
     fprintf (stderr,"  --filename   | -f FILENAME   File to capture to (default: capture.bin)\n");
+    fprintf (stderr,"  --usb-speed  | -u hs|fs|ls   USB speed for timing info (default: hs)\n");
     exit(-1);
 }
 //-----------------------------------------------------------------
@@ -64,7 +66,8 @@ int main(int argc, char *argv[])
     int            endpoint = -1;
     int            disable_sof = 0;
     int            disable_in_nak = 0;
-    int            inverse_match = 0;    
+    int            inverse_match = 0;
+    usb_capture::tUsbSpeed speed = usb_capture::USB_SPEED_HS;
 
     int option_index = 0;
     while ((c = getopt_long (argc, argv, GETOPTS_ARGS, long_options, &option_index)) != -1)
@@ -88,6 +91,19 @@ int main(int argc, char *argv[])
                 break;
             case 'n':
                 inverse_match = 1;
+                break;
+            case 'u': // Speed
+                if (strcmp(optarg, "hs") == 0)
+                    speed = usb_capture::USB_SPEED_HS;
+                else if (strcmp(optarg, "fs") == 0)
+                    speed = usb_capture::USB_SPEED_FS;
+                else if (strcmp(optarg, "ls") == 0)
+                    speed = usb_capture::USB_SPEED_LS;
+                else
+                {
+                    fprintf (stderr,"ERROR: Incorrect speed selection\n");
+                    help = 1;
+                }
                 break;
             default:
                 help = 1;
@@ -121,6 +137,7 @@ int main(int argc, char *argv[])
     capture.stop_capture();
 
     // Configure device
+    capture.set_speed(speed);
     capture.match_device(dev_addr, inverse_match);
     capture.match_endpoint(endpoint, inverse_match);
     capture.drop_sof(disable_sof);
