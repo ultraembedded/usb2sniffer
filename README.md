@@ -1,4 +1,4 @@
-# USB2.0 Capture Project (for LambdaConcept USB2Sniffer hardware)
+# USB2Sniffer: High Speed USB 2.0 capture (alternate SW/FPGA bitstream for LambdaConcept USB2Sniffer)
 
 Github: [https://github.com/ultraembedded/usb2sniffer](https://github.com/ultraembedded/usb2sniffer)
 
