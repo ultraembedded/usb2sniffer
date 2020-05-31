@@ -45,7 +45,7 @@ After converting captured data from binary to .usb file format, the [LambdaConce
 
 ![Lcsniff](docs/lcsniff.png)
 
-#### Wireshark
+#### Wireshark - Raw USB (DLT_USB_2_0)
 
 To view PCAPs with Wireshark, a recent version is required (>= 2019).
 
@@ -56,7 +56,16 @@ sudo apt-get update
 sudo apt-get install wireshark
 ```
 
-![Wireshark](docs/wireshark.png)
+![Wireshark Raw](docs/wireshark.png)
+
+#### Wireshark - Decoded data (DLT_USB_LINUX)
+
+Wireshark has some more advanced protocol dissectors available if you are willing to lose some lower-level USB details;
+```
+./usbmonpcap/usbmonpcap -f /tmp/capture.bin -o capture.pcap
+```
+
+![Wireshark Decoded](docs/wireshark.png)
 
 ## IP Designs Used
 
