@@ -71,6 +71,30 @@ Wireshark has some more advanced protocol dissectors available if you are willin
 
 ![Wireshark Decoded](docs/wireshark_usbmonpcap.png)
 
+
+#### Example - Audio capture
+
+As a demo, the following example shows how the USB2Sniffer can be used to capture USB audio traffic;
+```
+# Find the USB audio device number
+$ lsusb
+Bus 001 Device 025: ID 0d8c:013c C-Media Electronics, Inc. CM108 Audio Controller
+
+# Start the capture
+./sw/capture/capture -f capture_audio.bin
+
+# [Play some audio through the USB device, stop the capture]
+
+# Extract stream of bytes going to device 25 (audio controller) endpoint 1 (audio output)
+./sw/dump_bin/dump_bin -f capture_audio.bin -o capture.pcm -d 25 -e 1
+
+# Convert back to WAV file using FFMpeg
+ffmpeg -ac 2 -f s16le -i capture.pcm output.wav
+
+# Done..
+```
+
+
 ## IP Designs Used
 
 Most of the IP cores used in this project are designed by myself and available as easy to follow open-source Verilog modules.
