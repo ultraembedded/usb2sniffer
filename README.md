@@ -4,6 +4,10 @@ Github: [https://github.com/ultraembedded/usb2sniffer](https://github.com/ultrae
 
 ## Intro
 This repo contains an alternative set of FPGA gateware and SW for performing USB2.0 capture with the [LambaConcept USB2Sniffer](http://blog.lambdaconcept.com/doku.php?id=products:usb_sniffer) FPGA board ([buy](http://shop.lambdaconcept.com/home/35-usb2-sniffer.html)).
+
+The key difference between this and the stock FPGA gateware for this board is that this version contains more advanced USB protocol decoding within the FPGA, allowing for more powerful on-target device id / endpoint / SOF filtering.  
+Capturing USB traffic is done via a command-line tool, and the resulting binary can be converted into several 3rd party output formats for display or can be parsed using the provided SW library.
+
 ![USB2Sniffer](docs/usb2sniffer_board.jpg)
 
 ## Getting Started
