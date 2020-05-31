@@ -65,7 +65,7 @@ Wireshark has some more advanced protocol dissectors available if you are willin
 ./usbmonpcap/usbmonpcap -f /tmp/capture.bin -o capture.pcap
 ```
 
-![Wireshark Decoded](docs/wireshark.png)
+![Wireshark Decoded](docs/wireshark_usbmonpcap.png)
 
 ## IP Designs Used
 
