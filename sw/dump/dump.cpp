@@ -63,8 +63,8 @@ public:
         fprintf(m_file, "\r");
 
         struct usb_setup_pkt *setup = (struct usb_setup_pkt *)m_ctrl_setup;
-        fprintf(m_file, "   mRequestType: 0x%02x\n", setup->bmRequestType);
-        fprintf(m_file, "   bRequest:     0x%02x\n", setup->bRequest);
+        fprintf(m_file, "   mRequestType: 0x%02x (%s)\n", setup->bmRequestType, bmRequestTypeStr(setup->bmRequestType));
+        fprintf(m_file, "   bRequest:     0x%02x (%s)\n", setup->bRequest, bRequestStr(setup->bmRequestType, setup->bRequest));
         fprintf(m_file, "   wValue:       0x%04x\n", setup->wValue);
         fprintf(m_file, "   wIndex:       0x%04x\n", setup->wIndex);
         fprintf(m_file, "   wLength:      0x%04x\n", setup->wLength);

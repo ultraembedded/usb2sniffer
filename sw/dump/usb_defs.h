@@ -81,4 +81,65 @@ struct usb_setup_pkt
 #define MAX_SETUP_SIZE 8
 #define MAX_CTRL_SIZE  65536
 
+static const char * bmRequestTypeStr(uint8_t bmRequestType)
+{
+    switch (bmRequestType & USB_RECIPIENT_MASK)
+    {
+        case USB_RECIPIENT_DEVICE:
+            switch (bmRequestType & USB_REQUEST_TYPE_MASK)
+            {
+                case USB_STANDARD_REQUEST:
+                    return "DEVICE, STANDARD";
+                case USB_CLASS_REQUEST:
+                    return "DEVICE, CLASS";
+                case USB_VENDOR_REQUEST:
+                    return "DEVICE, VENDOR";
+            }
+        break;
+        case USB_RECIPIENT_INTERFACE:
+            switch (bmRequestType & USB_REQUEST_TYPE_MASK)
+            {
+                case USB_STANDARD_REQUEST:
+                    return "INTERFACE, STANDARD";
+                case USB_CLASS_REQUEST:
+                    return "INTERFACE, CLASS";
+                case USB_VENDOR_REQUEST:
+                    return "INTERFACE, VENDOR";
+            }
+        break;
+        case USB_RECIPIENT_ENDPOINT:
+            switch (bmRequestType & USB_REQUEST_TYPE_MASK)
+            {
+                case USB_STANDARD_REQUEST:
+                    return "ENDPOINT, STANDARD";
+                case USB_CLASS_REQUEST:
+                    return "ENDPOINT, CLASS";
+                case USB_VENDOR_REQUEST:
+                    return "ENDPOINT, VENDOR";
+            }
+        break;
+    }
+    return "-";
+}
+
+static const char * bRequestStr(uint8_t bmRequestType, uint8_t bRequest)
+{
+    if ((bmRequestType & USB_REQUEST_TYPE_MASK) == USB_RECIPIENT_DEVICE &&
+        (bmRequestType & USB_REQUEST_TYPE_MASK) == USB_STANDARD_REQUEST)
+        switch (bRequest)
+        {
+            case REQ_GET_STATUS:         return "GET_STATUS";
+            case REQ_CLEAR_FEATURE:      return "CLEAR_FEATURE";
+            case REQ_SET_FEATURE:        return "SET_FEATURE";
+            case REQ_SET_ADDRESS:        return "SET_ADDRESS";
+            case REQ_GET_DESCRIPTOR:     return "GET_DESCRIPTOR";
+            case REQ_SET_DESCRIPTOR:     return "SET_DESCRIPTOR";
+            case REQ_GET_CONFIGURATION:  return "GET_CONFIGURATION";
+            case REQ_SET_CONFIGURATION:  return "SET_CONFIGURATION";
+            case REQ_GET_INTERFACE:      return "GET_INTERFACE";
+            case REQ_SET_INTERFACE:      return "SET_INTERFACE";
+            case REQ_SYNC_FRAME:         return "SYNC_FRAME";
+        }
+    return "-";
+}
 #endif
