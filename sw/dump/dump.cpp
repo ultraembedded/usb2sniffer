@@ -10,12 +10,13 @@
 //-----------------------------------------------------------------
 // Command line options
 //-----------------------------------------------------------------
-#define GETOPTS_ARGS "f:u:h"
+#define GETOPTS_ARGS "f:u:vh"
 
 static struct option long_options[] =
 {
     {"filename",     required_argument, 0, 'f'},
     {"usb-speed",    required_argument, 0, 'u'},
+    {"verbose",      no_argument,       0, 'v'},
     {"help",         no_argument,       0, 'h'},
     {0, 0, 0, 0}
 };
@@ -25,6 +26,7 @@ static void help_options(void)
     fprintf (stderr,"Usage:\n");
     fprintf (stderr,"  --filename   | -f FILENAME   File to capture to (default: capture.bin)\n");
     fprintf (stderr,"  --usb-speed  | -u hs|fs|ls   USB speed for timing info (default: hs)\n");
+    fprintf (stderr,"  --verbose    | -v            Show verbose transfer details\n");
     exit(-1);
 }
 //-----------------------------------------------------------------
@@ -33,7 +35,7 @@ static void help_options(void)
 class convert_txt: public capture_bin
 {
 public:
-    convert_txt(FILE *f)
+    convert_txt(FILE *f, bool verbose)
     {
         m_file         = f;
         m_token_pid    = 0;
@@ -43,6 +45,7 @@ public:
         m_data_len     = 0;
         m_hshake       = 0;
         m_ctrl_pending = false;
+        m_verbose      = verbose;
     }
     //-----------------------------------------------------------------
     // output_ctrl: Output control frame
@@ -51,8 +54,8 @@ public:
     {
         m_ctrl_pending = false;
 
-        fprintf(m_file, "SETUP Device %d Endpoint %d\n", m_token_dev, m_token_ep);
-        fprintf(m_file, "  SETUP_PKT: ");
+        fprintf(m_file, "SETUP_PKT Device %d Endpoint %d\n", m_token_dev, m_token_ep);
+        fprintf(m_file, "  FRAME: ");
         for (int i=0;i<MAX_SETUP_SIZE;i++)
         {
             fprintf(m_file, "%02x ", m_ctrl_setup[i]);
@@ -173,6 +176,10 @@ public:
         // Buffered data - likely to be ISO
         if (m_data_len)
             process_frame();
+
+        if (m_verbose)
+            fprintf(m_file, "SOF - Frame %d\n", frame_num);
+
         return true;
     }
     bool on_rst(bool in_rst)
@@ -187,7 +194,9 @@ public:
         if (m_data_len)
             process_frame();
 
-        //fprintf(m_file, "%s Device %d Endpoint %d\n", capture_bin::get_pid_str(pid), dev, ep);
+        if (m_verbose)
+            fprintf(m_file, "%s Device %d Endpoint %d\n", capture_bin::get_pid_str(pid), dev, ep);
+
         m_token_pid = pid;
         m_token_dev = dev;
         m_token_ep  = ep;
@@ -195,10 +204,15 @@ public:
     }
     bool on_split(uint8_t hub_addr, bool complete)
     {
+        if (m_verbose)
+            fprintf(m_file, "%s Hub Addr %d\n", complete ? "CSPLIT" : "SSPLIT", hub_addr);
         return true;
     }
     bool on_handshake(uint8_t pid)
     {
+        if (m_verbose)
+            fprintf(m_file, "  %s\n", capture_bin::get_pid_str(pid));
+
         m_hshake = pid;
         if (pid == PID_ACK || pid == PID_STALL)
             process_frame();
@@ -206,6 +220,25 @@ public:
     }
     bool on_data(uint8_t pid, uint8_t *data, int length)
     {
+        if (m_verbose)
+        {
+            fprintf(m_file, "  %s: Length %d\n", capture_bin::get_pid_str(pid), length-2);
+
+            fprintf(m_file, "  ");
+            for (int i=0;i<length-2;i++)
+            {
+                fprintf(m_file, "%02x ", data[i]);
+
+                if (!((i+1) & 0xF) || ((i+1) == (length-2)))
+                    fprintf(m_file, "\n  ");
+            }
+
+            uint16_t exp_crc = capture_bin::calc_crc16(data, length-2);
+            exp_crc = (exp_crc >> 8) | (exp_crc << 8);
+
+            fprintf(m_file, "CRC = %02x%02x (Expected = %04x)\n", data[length-2], data[length-1], exp_crc);
+        }
+
         memcpy(m_data, data, length);
         m_data_len = length;
         m_data_pid = pid;
@@ -213,7 +246,8 @@ public:
     }
 
 protected:
-    FILE *m_file;
+    FILE *   m_file;
+    bool     m_verbose;
 
     uint8_t  m_token_pid;
     uint8_t  m_token_dev;
@@ -239,7 +273,8 @@ int main(int argc, char *argv[])
     int            c;
     int            help      = 0;
     const char *   filename  = NULL;
-    tUsbSpeed speed = USB_SPEED_HS;
+    tUsbSpeed      speed     = USB_SPEED_HS;
+    bool           verbose   = 0;
 
     int option_index = 0;
     while ((c = getopt_long (argc, argv, GETOPTS_ARGS, long_options, &option_index)) != -1)
@@ -262,6 +297,9 @@ int main(int argc, char *argv[])
                     help = 1;
                 }
                 break;
+            case 'v':
+                verbose = true;
+                break;
             default:
                 help = 1;
                 break;
@@ -274,6 +312,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    convert_txt txt(stdout);
+    convert_txt txt(stdout, verbose);
     return txt.open(filename, speed == USB_SPEED_HS) ? 0 : -1;
 }
